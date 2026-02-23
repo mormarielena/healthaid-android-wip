@@ -70,7 +70,7 @@ public class RegisterActivity extends AppCompatActivity {
                                 .apply();
 
                         Toast.makeText(RegisterActivity.this, "Account created successfully!", Toast.LENGTH_SHORT).show();
-                        startActivity(new Intent(RegisterActivity.this, MainActivity.class));
+                        startActivity(new Intent(RegisterActivity.this, SplashActivity.class));
                         finish();
                     } else {
                         Toast.makeText(RegisterActivity.this, "Error: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();

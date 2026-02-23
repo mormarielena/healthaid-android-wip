@@ -30,12 +30,12 @@ public class HomeFragment extends Fragment {
         recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 2));
 
         symptomList = new ArrayList<>();
-        symptomList.add(new Symptom("Headache", android.R.drawable.ic_dialog_alert));
-        symptomList.add(new Symptom("Cold & Flu", android.R.drawable.ic_menu_sort_by_size));
-        symptomList.add(new Symptom("Muscle Pain", android.R.drawable.ic_menu_directions));
-        symptomList.add(new Symptom("Stomachache", android.R.drawable.ic_menu_info_details));
-        symptomList.add(new Symptom("Fever", android.R.drawable.ic_menu_day));
-        symptomList.add(new Symptom("Allergies", android.R.drawable.ic_menu_camera));
+        symptomList.add(new Symptom("Headache", R.drawable.dizzy));
+        symptomList.add(new Symptom("Cold & Flu", R.drawable.cold));
+        symptomList.add(new Symptom("Muscle Pain", R.drawable.muscle_pain));
+        symptomList.add(new Symptom("Stomachache", R.drawable.stomachache));
+        symptomList.add(new Symptom("Fever", R.drawable.fever));
+        symptomList.add(new Symptom("Allergies", R.drawable.allergy));
 
         adapter = new SymptomAdapter(symptomList, new SymptomAdapter.OnItemClickListener() {
             @Override

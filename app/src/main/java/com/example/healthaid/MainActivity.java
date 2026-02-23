@@ -1,4 +1,4 @@
-package com.example.healthaid; // Pune pachetul tău aici
+package com.example.healthaid;
 
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
@@ -21,12 +21,11 @@ public class MainActivity extends AppCompatActivity {
 
         bottomNav.setOnItemSelectedListener(item -> {
             Fragment selectedFragment = null;
-
             int itemId = item.getItemId();
 
             if (itemId == R.id.nav_home) {
                 selectedFragment = new HomeFragment();
-            } else if (itemId == R.id.nav_reminder) {
+            } else if (itemId == R.id.nav_reminders) {
                 selectedFragment = new ReminderFragment();
             } else if (itemId == R.id.nav_profile) {
                 selectedFragment = new ProfileFragment();
@@ -37,7 +36,6 @@ public class MainActivity extends AppCompatActivity {
                         .replace(R.id.fragment_container, selectedFragment)
                         .commit();
             }
-
             return true;
         });
     }
