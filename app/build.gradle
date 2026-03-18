@@ -38,8 +38,8 @@ dependencies {
     implementation libs.firebase.auth
     implementation libs.credentials
     implementation libs.credentials.play.services.auth
+    implementation libs.firebase.firestore.v2511
     implementation libs.googleid
-    implementation libs.firebase.firestore
     testImplementation libs.junit
     androidTestImplementation libs.ext.junit
     androidTestImplementation libs.espresso.core
