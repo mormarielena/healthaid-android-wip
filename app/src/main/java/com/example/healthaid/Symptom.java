@@ -2,18 +2,16 @@ package com.example.healthaid;
 
 public class Symptom {
     private String name;
-    private int iconResId;
+    private String subtitle;
+    private int    iconResId;
 
-    public Symptom(String name, int iconResId) {
-        this.name = name;
+    public Symptom(String name, String subtitle, int iconResId) {
+        this.name     = name;
+        this.subtitle = subtitle;
         this.iconResId = iconResId;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public int getIconResId() {
-        return iconResId;
-    }
+    public String getName()     { return name; }
+    public String getSubtitle() { return subtitle; }
+    public int getIconResId()   { return iconResId; }
 }

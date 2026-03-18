@@ -1,65 +1,62 @@
-package com.example.healthaid; // Asigură-te că pachetul este corect
+package com.example.healthaid;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
 import java.util.List;
 
 public class SymptomAdapter extends RecyclerView.Adapter<SymptomAdapter.SymptomViewHolder> {
 
-    private List<Symptom> symptomList;
-    private OnItemClickListener listener;
-
-    // Interface for handling item clicks
     public interface OnItemClickListener {
         void onItemClick(Symptom symptom);
     }
 
-    // Constructor for the adapter
+    private final List<Symptom>      symptomList;
+    private final OnItemClickListener listener;
+
     public SymptomAdapter(List<Symptom> symptomList, OnItemClickListener listener) {
         this.symptomList = symptomList;
-        this.listener = listener;
+        this.listener    = listener;
     }
 
     @NonNull
     @Override
     public SymptomViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_symptom, parent, false);
+        View view = LayoutInflater.from(parent.getContext())
+                .inflate(R.layout.item_symptom, parent, false);
         return new SymptomViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull SymptomViewHolder holder, int position) {
-        Symptom currentSymptom = symptomList.get(position);
-
-        holder.textViewName.setText(currentSymptom.getName());
-        holder.imageViewIcon.setImageResource(currentSymptom.getIconResId());
-
+        Symptom symptom = symptomList.get(position);
+        holder.textViewName.setText(symptom.getName());
+        holder.textViewSubtitle.setText(symptom.getSubtitle());
+        holder.imageViewIcon.setImageResource(symptom.getIconResId());
         holder.itemView.setOnClickListener(v -> {
-            if (listener != null) {
-                listener.onItemClick(currentSymptom);
-            }
+            if (listener != null) listener.onItemClick(symptom);
         });
     }
 
     @Override
-    public int getItemCount() {
-        return symptomList.size();
-    }
+    public int getItemCount() { return symptomList.size(); }
 
-    // Class for representing a single symptom item
     public static class SymptomViewHolder extends RecyclerView.ViewHolder {
-        public ImageView imageViewIcon;
-        public TextView textViewName;
+        ImageView imageViewIcon;
+        TextView  textViewName;
+        TextView  textViewSubtitle;
 
         public SymptomViewHolder(@NonNull View itemView) {
             super(itemView);
-            imageViewIcon = itemView.findViewById(R.id.imageViewSymptomIcon);
-            textViewName = itemView.findViewById(R.id.textViewSymptomName);
+            imageViewIcon   = itemView.findViewById(R.id.imageViewSymptomIcon);
+            textViewName    = itemView.findViewById(R.id.textViewSymptomName);
+            textViewSubtitle = itemView.findViewById(R.id.textViewSymptomSubtitle);
         }
     }
 }
