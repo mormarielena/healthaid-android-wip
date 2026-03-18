@@ -12,6 +12,16 @@
         android:title="Reminders" />
 
     <item
+        android:id="@+id/nav_history"
+        android:icon="@android:drawable/ic_menu_recent_history"
+        android:title="History" />
+
+    <item
+        android:id="@+id/nav_caregiver"
+        android:icon="@android:drawable/ic_menu_share"
+        android:title="Caregiver" />
+
+    <item
         android:id="@+id/nav_profile"
         android:icon="@drawable/ic_profile"
         android:title="Profile" />

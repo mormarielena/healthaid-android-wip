@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="20dp">
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Caregiver's email address *"
+        android:layout_marginBottom="20dp"
+        style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/editCaregiverEmail"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textEmailAddress"
+            android:maxLines="1" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Permission level"
+        android:textSize="13sp"
+        android:textStyle="bold"
+        android:textColor="@color/text_dark"
+        android:layout_marginBottom="8dp" />
+
+    <RadioGroup
+        android:id="@+id/radioPermissions"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <RadioButton
+            android:id="@+id/radioViewOnly"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="View only — can see schedule and history"
+            android:textSize="13sp"
+            android:checked="true"
+            android:paddingStart="8dp" />
+
+        <RadioButton
+            android:id="@+id/radioEditor"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Editor — can also add and edit reminders"
+            android:textSize="13sp"
+            android:paddingStart="8dp"
+            android:layout_marginTop="4dp" />
+
+    </RadioGroup>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="The caregiver must already have a HealthAid account with this email."
+        android:textSize="11sp"
+        android:textColor="@color/text_gray"
+        android:textStyle="italic"
+        android:layout_marginTop="16dp" />
+
+</LinearLayout>

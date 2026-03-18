@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="10dp"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="2dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="8dp">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/textRefillMedName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Medication"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/text_dark" />
+
+                <TextView
+                    android:id="@+id/textRefillPillCount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0 pills remaining"
+                    android:textSize="13sp"
+                    android:textColor="@color/text_gray"
+                    android:layout_marginTop="2dp" />
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/btnAddRefill"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:text="Log refill"
+                android:textSize="12sp"
+                android:backgroundTint="@color/mint_green_dark"
+                android:textColor="@color/white"
+                android:paddingHorizontal="12dp" />
+        </LinearLayout>
+
+        <!-- Stock progress bar -->
+        <ProgressBar
+            android:id="@+id/barPillStock"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="8dp"
+            android:max="30"
+            android:progress="0"
+            android:progressTint="@color/mint_green_dark"
+            android:progressBackgroundTint="@color/text_gray"
+            android:layout_marginBottom="6dp"
+            android:visibility="gone" />
+
+        <!-- Low stock warning -->
+        <TextView
+            android:id="@+id/textRefillWarning"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="⚠ Low stock — refill soon"
+            android:textSize="12sp"
+            android:textColor="#E65100"
+            android:visibility="gone" />
+
+    </LinearLayout>
+</androidx.cardview.widget.CardView>

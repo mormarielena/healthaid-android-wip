@@ -12,7 +12,7 @@ public class ReminderScheduler {
 
     // ─── Schedule a daily repeating alarm ────────────────────────────────────
 
-    /** PILL REMINDER NOTIFICATION
+    /**
      * Parses the time string (e.g. "08:00 AM" or "14:30"), sets the alarm
      * for that time today — or tomorrow if it has already passed — and
      * repeats every 24 hours until cancelled.
@@ -37,19 +37,9 @@ public class ReminderScheduler {
         AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         PendingIntent pi = buildPendingIntent(context, reminder);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            if (am.canScheduleExactAlarms()) {
-                am.setRepeating(AlarmManager.RTC_WAKEUP,
-                        cal.getTimeInMillis(), AlarmManager.INTERVAL_DAY, pi);
-            } else {
-
-                am.setInexactRepeating(AlarmManager.RTC_WAKEUP,
-                        cal.getTimeInMillis(), AlarmManager.INTERVAL_DAY, pi);
-            }
-        } else {
-            am.setRepeating(AlarmManager.RTC_WAKEUP,
-                    cal.getTimeInMillis(), AlarmManager.INTERVAL_DAY, pi);
-        }
+        // USE_EXACT_ALARM is pre-granted — no runtime check needed
+        am.setAlarmClock(
+                new AlarmManager.AlarmClockInfo(cal.getTimeInMillis(), pi), pi);
     }
 
     // ─── Cancel an alarm ─────────────────────────────────────────────────────
@@ -60,6 +50,7 @@ public class ReminderScheduler {
         am.cancel(buildPendingIntent(context, reminder));
     }
 
+    // ─── PendingIntent — unique per reminder ─────────────────────────────────
 
     private static PendingIntent buildPendingIntent(Context context, PillReminder reminder) {
         Intent intent = new Intent(context, ReminderReceiver.class);
@@ -68,6 +59,7 @@ public class ReminderScheduler {
                 reminder.getDosage() + " " + reminder.getUnit());
         intent.putExtra(ReminderReceiver.EXTRA_REMINDER_ID,  reminder.getId());
 
+        // Firestore doc ID hashCode gives a stable unique int per reminder
         int requestCode = reminder.getId().hashCode();
 
         return PendingIntent.getBroadcast(
@@ -78,6 +70,7 @@ public class ReminderScheduler {
         );
     }
 
+    // ─── Parse "08:00 AM" or "14:30" → [hour24, minute] ─────────────────────
 
     public static int[] parseTime(String timeStr) {
         if (timeStr == null || timeStr.isEmpty()) return null;

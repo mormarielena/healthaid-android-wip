@@ -127,21 +127,22 @@ public class ReminderFragment extends Fragment
         View dialogView = LayoutInflater.from(getContext())
                 .inflate(R.layout.dialog_add_reminder, null);
 
-        TextInputEditText editPillName = dialogView.findViewById(R.id.editDialogPillName);
-        TextInputEditText editDosage   = dialogView.findViewById(R.id.editDialogDosage);
-        TextInputEditText editUnit     = dialogView.findViewById(R.id.editDialogUnit);
-        TextView          textPickTime = dialogView.findViewById(R.id.textPickTime);
+        TextInputEditText editPillName    = dialogView.findViewById(R.id.editDialogPillName);
+        TextInputEditText editDosage      = dialogView.findViewById(R.id.editDialogDosage);
+        TextInputEditText editUnit        = dialogView.findViewById(R.id.editDialogUnit);
+        View              rowPickTime     = dialogView.findViewById(R.id.rowPickTime);
+        TextView          textTimeDisplay = dialogView.findViewById(R.id.textDialogTimeDisplay);
 
         selectedTime = "";
 
-        textPickTime.setOnClickListener(v ->
+        rowPickTime.setOnClickListener(v ->
                 new TimePickerDialog(getContext(), (picker, hour, minute) -> {
-                    String amPm       = hour < 12 ? "AM" : "PM";
+                    String amPm        = hour < 12 ? "AM" : "PM";
                     int    displayHour = hour % 12;
                     if (displayHour == 0) displayHour = 12;
-                    selectedTime = String.format(Locale.getDefault(),
+                    selectedTime = String.format(Locale.US,
                             "%02d:%02d %s", displayHour, minute, amPm);
-                    textPickTime.setText(selectedTime);
+                    textTimeDisplay.setText(selectedTime);
                 }, 8, 0, false).show()
         );
 
