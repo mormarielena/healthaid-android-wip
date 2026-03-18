@@ -78,15 +78,8 @@ public class HistoryFragment extends Fragment {
                 .format(weekAgo) + " – today";
         textAdherencePeriod.setText(periodLabel);
 
-        // Count all dose_logs across all medications in the last 7 days
-        // using a collection group query on "dose_logs"
-        db.collectionGroup("dose_logs")
-                .whereEqualTo("medicationId", "")   // placeholder — see note below
-                .get();
-
-        // Because collection group queries require an index and "dose_logs"
-        // are nested under each medication, we instead load all active meds
-        // and tally their "taken" field directly — simpler and index-free.
+        // Adherence is calculated from the medications collection directly —
+        // simpler and requires no extra index.
         db.collection("users").document(userId)
                 .collection("medications")
                 .whereEqualTo("isActive", true)

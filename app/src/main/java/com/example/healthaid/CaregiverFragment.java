@@ -25,13 +25,13 @@ import com.google.firebase.firestore.QuerySnapshot;
 
 public class CaregiverFragment extends Fragment {
 
-    private FirebaseFirestore  db;
-    private String             userId;
-    private String             currentUserName;
+    private FirebaseFirestore    db;
+    private String               userId;
+    private String               currentUserName;
 
-    private LinearLayout       containerCaregivers;
-    private TextView           textViewEmpty;
-    private ProgressBar        progressBar;
+    private LinearLayout         containerCaregivers;
+    private TextView             textViewEmpty;
+    private ProgressBar          progressBar;
     private ListenerRegistration listenerReg;
 
     @Nullable
@@ -51,8 +51,6 @@ public class CaregiverFragment extends Fragment {
         FloatingActionButton fab = view.findViewById(R.id.fabAddCaregiver);
 
         fab.setOnClickListener(v -> loadUserNameThenShowDialog());
-
-        // Load current user's name for the invite
         loadCurrentUserName();
 
         return view;
@@ -70,34 +68,41 @@ public class CaregiverFragment extends Fragment {
         if (listenerReg != null) listenerReg.remove();
     }
 
-    // ─── Load current user name (used in invite record) ──────────────────────
+    // ─── Load current user name ───────────────────────────────────────────────
 
     private void loadCurrentUserName() {
         db.collection("users").document(userId).get()
                 .addOnSuccessListener(snap -> {
                     if (snap.exists()) {
                         currentUserName = snap.getString("name");
-                        if (currentUserName == null) currentUserName = "A HealthAid user";
+                    }
+                    if (currentUserName == null || currentUserName.isEmpty()) {
+                        currentUserName = "A HealthAid user";
                     }
                 });
     }
 
-    // ─── Real-time list of caregivers linked to this patient ─────────────────
+    // ─── Real-time caregiver list ─────────────────────────────────────────────
+    // Query only on patientUserId (single-field, no index needed).
+    // Filter isActive in Java to avoid requiring a composite index.
 
     private void listenForCaregivers() {
         progressBar.setVisibility(View.VISIBLE);
+        textViewEmpty.setVisibility(View.GONE);
 
         listenerReg = db.collection("caregiver_links")
                 .whereEqualTo("patientUserId", userId)
-                .whereEqualTo("isActive", true)
                 .addSnapshotListener((snapshots, error) -> {
+
                     progressBar.setVisibility(View.GONE);
+
                     if (error != null) {
                         Toast.makeText(getContext(),
                                 "Failed to load caregivers: " + error.getMessage(),
-                                Toast.LENGTH_SHORT).show();
+                                Toast.LENGTH_LONG).show();
                         return;
                     }
+
                     rebuildCaregiverList(snapshots);
                 });
     }
@@ -105,19 +110,25 @@ public class CaregiverFragment extends Fragment {
     private void rebuildCaregiverList(QuerySnapshot snapshots) {
         containerCaregivers.removeAllViews();
 
-        if (snapshots == null || snapshots.isEmpty()) {
+        if (snapshots == null) {
             textViewEmpty.setVisibility(View.VISIBLE);
             return;
         }
 
-        textViewEmpty.setVisibility(View.GONE);
-
+        int added = 0;
         for (var doc : snapshots.getDocuments()) {
             CaregiverLink link = doc.toObject(CaregiverLink.class);
             if (link == null) continue;
+
+            // Filter isActive in Java — no composite index required
+            if (!link.getIsActive()) continue;
+
             link.setId(doc.getId());
             addCaregiverCard(link);
+            added++;
         }
+
+        textViewEmpty.setVisibility(added == 0 ? View.VISIBLE : View.GONE);
     }
 
     private void addCaregiverCard(CaregiverLink link) {
@@ -129,8 +140,8 @@ public class CaregiverFragment extends Fragment {
         TextView textPermission = card.findViewById(R.id.textCaregiverPermission);
         View     btnRevoke      = card.findViewById(R.id.btnRevokeCaregiver);
 
-        String displayName = link.getCaregiverName() != null
-                && !link.getCaregiverName().isEmpty()
+        String displayName = (link.getCaregiverName() != null
+                && !link.getCaregiverName().isEmpty())
                 ? link.getCaregiverName() : "Unknown";
 
         textName.setText(displayName);
@@ -141,7 +152,6 @@ public class CaregiverFragment extends Fragment {
         textPermission.setText(perm);
 
         btnRevoke.setOnClickListener(v -> confirmRevoke(link));
-
         containerCaregivers.addView(card);
     }
 
@@ -164,7 +174,7 @@ public class CaregiverFragment extends Fragment {
         View dialogView = LayoutInflater.from(getContext())
                 .inflate(R.layout.dialog_invite_caregiver, null);
 
-        TextInputEditText editEmail = dialogView.findViewById(R.id.editCaregiverEmail);
+        TextInputEditText editEmail  = dialogView.findViewById(R.id.editCaregiverEmail);
         RadioGroup        radioPerms = dialogView.findViewById(R.id.radioPermissions);
 
         new AlertDialog.Builder(getContext())
@@ -178,8 +188,7 @@ public class CaregiverFragment extends Fragment {
                         return;
                     }
 
-                    String permission = radioPerms.getCheckedRadioButtonId()
-                            == R.id.radioEditor
+                    String permission = radioPerms.getCheckedRadioButtonId() == R.id.radioEditor
                             ? CaregiverLink.PERMISSION_EDITOR
                             : CaregiverLink.PERMISSION_VIEW_ONLY;
 
@@ -189,10 +198,9 @@ public class CaregiverFragment extends Fragment {
                 .show();
     }
 
-    // ─── Look up caregiver by email then write the link ───────────────────────
+    // ─── Look up caregiver by email and write the link ────────────────────────
 
     private void findUserByEmailAndLink(String email, String permission) {
-        // Look up the caregiver's uid from their email in the users collection
         db.collection("users")
                 .whereEqualTo("email", email)
                 .limit(1)
@@ -206,8 +214,8 @@ public class CaregiverFragment extends Fragment {
                         return;
                     }
 
-                    var caregiverDoc   = snapshots.getDocuments().get(0);
-                    String caregiverId = caregiverDoc.getId();
+                    var    caregiverDoc  = snapshots.getDocuments().get(0);
+                    String caregiverId   = caregiverDoc.getId();
                     String caregiverName = caregiverDoc.getString("name");
 
                     if (caregiverId.equals(userId)) {
@@ -222,12 +230,11 @@ public class CaregiverFragment extends Fragment {
                 .addOnFailureListener(e ->
                         Toast.makeText(getContext(),
                                 "Lookup failed: " + e.getMessage(),
-                                Toast.LENGTH_SHORT).show());
+                                Toast.LENGTH_LONG).show());
     }
 
     private void writeCaregiverLink(String caregiverId, String caregiverName,
                                     String caregiverEmail, String permission) {
-
         CaregiverLink link = new CaregiverLink(
                 userId, caregiverId, caregiverEmail, permission);
         link.setCaregiverName(caregiverName != null ? caregiverName : "");
@@ -242,28 +249,26 @@ public class CaregiverFragment extends Fragment {
                 .addOnFailureListener(e ->
                         Toast.makeText(getContext(),
                                 "Could not add caregiver: " + e.getMessage(),
-                                Toast.LENGTH_SHORT).show());
+                                Toast.LENGTH_LONG).show());
     }
 
-    // ─── Revoke caregiver access ──────────────────────────────────────────────
+    // ─── Revoke access ────────────────────────────────────────────────────────
 
     private void confirmRevoke(CaregiverLink link) {
-        String name = link.getCaregiverName() != null
-                && !link.getCaregiverName().isEmpty()
+        String name = (link.getCaregiverName() != null && !link.getCaregiverName().isEmpty())
                 ? link.getCaregiverName() : link.getCaregiverEmail();
 
         new AlertDialog.Builder(getContext())
                 .setTitle("Remove caregiver")
                 .setMessage("Remove " + name + "'s access to your medications?")
-                .setPositiveButton("Remove", (dialog, which) -> {
-                    db.collection("caregiver_links")
-                            .document(link.getId())
-                            .update("isActive", false)
-                            .addOnFailureListener(e ->
-                                    Toast.makeText(getContext(),
-                                            "Could not revoke: " + e.getMessage(),
-                                            Toast.LENGTH_SHORT).show());
-                })
+                .setPositiveButton("Remove", (dialog, which) ->
+                        db.collection("caregiver_links")
+                                .document(link.getId())
+                                .update("isActive", false)
+                                .addOnFailureListener(e ->
+                                        Toast.makeText(getContext(),
+                                                "Could not revoke: " + e.getMessage(),
+                                                Toast.LENGTH_SHORT).show()))
                 .setNegativeButton("Cancel", null)
                 .show();
     }

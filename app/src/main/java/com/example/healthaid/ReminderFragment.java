@@ -22,7 +22,6 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.ListenerRegistration;
-import com.google.firebase.firestore.Query;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,8 +39,7 @@ public class ReminderFragment extends Fragment
     private FirebaseFirestore    db;
     private String               userId;
     private ListenerRegistration listenerReg;
-
-    private String selectedTime = "";
+    private String               selectedTime = "";
 
     @Nullable
     @Override
@@ -64,8 +62,6 @@ public class ReminderFragment extends Fragment
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.setAdapter(adapter);
 
-        ReminderReceiver.createChannelIfNeeded(requireContext());
-
         fabAdd.setOnClickListener(v -> showAddReminderDialog());
 
         return view;
@@ -84,6 +80,8 @@ public class ReminderFragment extends Fragment
     }
 
     // ─── Firestore real-time listener ────────────────────────────────────────
+    // No orderBy — avoids the server timestamp null exclusion bug.
+    // New pills appear instantly. We sort by pillName in Java instead.
 
     private void listenForReminders() {
         progressBar.setVisibility(View.VISIBLE);
@@ -93,18 +91,19 @@ public class ReminderFragment extends Fragment
                 .document(userId)
                 .collection("medications")
                 .whereEqualTo("isActive", true)
-                .orderBy("createdAt", Query.Direction.ASCENDING)
                 .addSnapshotListener((snapshots, error) -> {
+
                     progressBar.setVisibility(View.GONE);
 
                     if (error != null) {
                         Toast.makeText(getContext(),
                                 "Failed to load reminders: " + error.getMessage(),
-                                Toast.LENGTH_SHORT).show();
+                                Toast.LENGTH_LONG).show();
                         return;
                     }
 
                     reminderList.clear();
+
                     if (snapshots != null) {
                         for (var doc : snapshots.getDocuments()) {
                             PillReminder r = doc.toObject(PillReminder.class);
@@ -114,6 +113,10 @@ public class ReminderFragment extends Fragment
                             }
                         }
                     }
+
+                    // Sort by pill name alphabetically in-memory
+                    reminderList.sort((a, b) ->
+                            a.getPillName().compareToIgnoreCase(b.getPillName()));
 
                     adapter.notifyDataSetChanged();
                     textViewEmpty.setVisibility(
@@ -187,7 +190,7 @@ public class ReminderFragment extends Fragment
                 .addOnFailureListener(e ->
                         Toast.makeText(getContext(),
                                 "Failed to save: " + e.getMessage(),
-                                Toast.LENGTH_SHORT).show());
+                                Toast.LENGTH_LONG).show());
     }
 
     // ─── Taken toggle ─────────────────────────────────────────────────────────

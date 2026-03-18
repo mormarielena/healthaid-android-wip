@@ -2,6 +2,7 @@ package com.example.healthaid;
 
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentId;
+import com.google.firebase.firestore.PropertyName;
 
 public class CaregiverLink {
 
@@ -38,7 +39,8 @@ public class CaregiverLink {
     public String    getCaregiverName()   { return caregiverName; }
     public String    getPatientName()     { return patientName; }
     public String    getPermissionLevel() { return permissionLevel; }
-    public boolean   isActive()           { return isActive; }
+    @PropertyName("isActive")
+    public boolean   getIsActive()         { return isActive; }
     public Timestamp getLinkedAt()        { return linkedAt; }
 
     public void setId(String id)                   { this.id = id; }
@@ -48,6 +50,7 @@ public class CaregiverLink {
     public void setCaregiverName(String n)         { this.caregiverName = n; }
     public void setPatientName(String n)           { this.patientName = n; }
     public void setPermissionLevel(String p)       { this.permissionLevel = p; }
+    @PropertyName("isActive")
     public void setActive(boolean a)               { this.isActive = a; }
     public void setLinkedAt(Timestamp t)           { this.linkedAt = t; }
 }

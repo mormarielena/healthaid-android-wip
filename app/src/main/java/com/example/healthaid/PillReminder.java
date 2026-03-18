@@ -2,6 +2,7 @@ package com.example.healthaid;
 
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentId;
+import com.google.firebase.firestore.PropertyName;
 import com.google.firebase.firestore.ServerTimestamp;
 
 public class PillReminder {
@@ -44,7 +45,8 @@ public class PillReminder {
     public String    getUnit()               { return unit; }
     public String    getTime()               { return time; }
     public boolean   isTaken()               { return taken; }
-    public boolean   isActive()              { return isActive; }
+    @PropertyName("isActive")
+    public boolean   getIsActive()            { return isActive; }
     public int       getPillsRemaining()     { return pillsRemaining; }
     public int       getLowStockThreshold()  { return lowStockThreshold; }
     public Timestamp getCreatedAt()          { return createdAt; }
@@ -56,6 +58,7 @@ public class PillReminder {
     public void setUnit(String u)                       { this.unit = u; }
     public void setTime(String t)                       { this.time = t; }
     public void setTaken(boolean taken)                 { this.taken = taken; }
+    @PropertyName("isActive")
     public void setActive(boolean active)               { this.isActive = active; }
     public void setPillsRemaining(int p)                { this.pillsRemaining = p; }
     public void setLowStockThreshold(int t)             { this.lowStockThreshold = t; }
