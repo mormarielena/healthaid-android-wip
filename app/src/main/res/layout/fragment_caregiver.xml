@@ -57,6 +57,43 @@
                 android:paddingTop="40dp"
                 android:visibility="gone" />
 
+            <!-- Patient pill monitoring section (visible in caregiver mode) -->
+            <TextView
+                android:id="@+id/textPatientPillsHeader"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Patient's medications today"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:textColor="@color/text_dark"
+                android:layout_marginBottom="8dp"
+                android:visibility="gone" />
+
+            <ProgressBar
+                android:id="@+id/progressPatientPills"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:visibility="gone" />
+
+            <LinearLayout
+                android:id="@+id/containerPatientPills"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginBottom="24dp"
+                android:visibility="gone" />
+
+            <!-- My caregivers section -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="People monitoring me"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:textColor="@color/text_dark"
+                android:layout_marginBottom="8dp" />
+
             <!-- Caregiver cards injected here -->
             <LinearLayout
                 android:id="@+id/containerCaregivers"

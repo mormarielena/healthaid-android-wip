@@ -58,6 +58,7 @@
 
                 <!-- Full name -->
                 <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/layoutRegName"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="Full name"
@@ -74,6 +75,7 @@
 
                 <!-- Email -->
                 <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/layoutRegEmail"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="Email address"
@@ -90,6 +92,7 @@
 
                 <!-- Password -->
                 <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/layoutRegPassword"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="Password"
@@ -107,6 +110,7 @@
 
                 <!-- Confirm password -->
                 <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/layoutRegConfirm"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="Confirm password"

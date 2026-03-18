@@ -20,10 +20,11 @@ public class ReminderAdapter extends RecyclerView.Adapter<ReminderAdapter.Remind
         void onDeleteClicked(PillReminder reminder);
     }
 
-    private final List<PillReminder> reminderList;
+    private final List<PillReminder>       reminderList;
     private final OnReminderActionListener listener;
 
-    public ReminderAdapter(List<PillReminder> reminderList, OnReminderActionListener listener) {
+    public ReminderAdapter(List<PillReminder> reminderList,
+                           OnReminderActionListener listener) {
         this.reminderList = reminderList;
         this.listener     = listener;
     }
@@ -42,16 +43,19 @@ public class ReminderAdapter extends RecyclerView.Adapter<ReminderAdapter.Remind
 
         holder.textViewPillName.setText(reminder.getPillName());
 
-        // Show dosage + unit + time, e.g. "500mg tablet — 08:00 AM"
-        String subtitle = reminder.getDosage() + " " + reminder.getUnit()
-                + " — " + reminder.getTime();
-        holder.textViewTime.setText(subtitle);
+        String dosagePart = (reminder.getDosage() != null && !reminder.getDosage().isEmpty())
+                ? reminder.getDosage() + " " + reminder.getUnit() + " — "
+                : "";
+        holder.textViewTime.setText(dosagePart + reminder.getTime());
 
-        // Strike-through pill name when marked as taken
-        if (reminder.isTaken()) {
+        // Use isTakenToday() — automatically false if takenDate != today,
+        // giving us a free daily reset without any server-side job.
+        boolean takenToday = reminder.isTakenToday();
+
+        if (takenToday) {
             holder.textViewPillName.setPaintFlags(
                     holder.textViewPillName.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
-            holder.textViewPillName.setAlpha(0.45f);
+            holder.textViewPillName.setAlpha(0.4f);
         } else {
             holder.textViewPillName.setPaintFlags(
                     holder.textViewPillName.getPaintFlags() & ~Paint.STRIKE_THRU_TEXT_FLAG);
@@ -59,7 +63,7 @@ public class ReminderAdapter extends RecyclerView.Adapter<ReminderAdapter.Remind
         }
 
         holder.checkBoxTaken.setOnCheckedChangeListener(null);
-        holder.checkBoxTaken.setChecked(reminder.isTaken());
+        holder.checkBoxTaken.setChecked(takenToday);
         holder.checkBoxTaken.setOnCheckedChangeListener((btn, isChecked) ->
                 listener.onTakenToggled(reminder, isChecked));
 
@@ -68,9 +72,7 @@ public class ReminderAdapter extends RecyclerView.Adapter<ReminderAdapter.Remind
     }
 
     @Override
-    public int getItemCount() {
-        return reminderList.size();
-    }
+    public int getItemCount() { return reminderList.size(); }
 
     public static class ReminderViewHolder extends RecyclerView.ViewHolder {
         TextView    textViewPillName;

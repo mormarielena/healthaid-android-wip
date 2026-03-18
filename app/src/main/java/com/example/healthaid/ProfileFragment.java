@@ -155,6 +155,8 @@ public class ProfileFragment extends Fragment {
 
     private void signOut() {
         FirebaseAuth.getInstance().signOut();
+        MissedDoseWatcher.stop();
+        SessionManager.reset();
         Intent intent = new Intent(getActivity(), LoginActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);

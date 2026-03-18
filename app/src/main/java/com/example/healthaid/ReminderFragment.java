@@ -19,13 +19,15 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.textfield.TextInputEditText;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.ListenerRegistration;
+import com.google.firebase.firestore.Transaction;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 public class ReminderFragment extends Fragment
         implements ReminderAdapter.OnReminderActionListener {
@@ -35,11 +37,15 @@ public class ReminderFragment extends Fragment
     private List<PillReminder>   reminderList;
     private ProgressBar          progressBar;
     private TextView             textViewEmpty;
+    private TextView             textViewTitle;
+    private FloatingActionButton fabAdd;
 
     private FirebaseFirestore    db;
-    private String               userId;
     private ListenerRegistration listenerReg;
     private String               selectedTime = "";
+
+    // The UID whose data we load — own UID or patient UID in caregiver mode
+    private String activeUserId;
 
     @Nullable
     @Override
@@ -49,18 +55,33 @@ public class ReminderFragment extends Fragment
 
         View view = inflater.inflate(R.layout.fragment_reminder, container, false);
 
-        recyclerView  = view.findViewById(R.id.recyclerViewReminders);
-        progressBar   = view.findViewById(R.id.progressBarReminders);
-        textViewEmpty = view.findViewById(R.id.textViewEmpty);
-        FloatingActionButton fabAdd = view.findViewById(R.id.fabAddReminder);
+        recyclerView   = view.findViewById(R.id.recyclerViewReminders);
+        progressBar    = view.findViewById(R.id.progressBarReminders);
+        textViewEmpty  = view.findViewById(R.id.textViewEmpty);
+        textViewTitle  = view.findViewById(R.id.textViewTitle);
+        fabAdd         = view.findViewById(R.id.fabAddReminder);
 
-        db     = FirebaseFirestore.getInstance();
-        userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        db           = FirebaseFirestore.getInstance();
+        activeUserId = SessionManager.get().getActiveUserId();
 
         reminderList = new ArrayList<>();
         adapter      = new ReminderAdapter(reminderList, this);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.setAdapter(adapter);
+
+        // ── Caregiver mode adjustments ────────────────────────────────────────
+        SessionManager session = SessionManager.get();
+        if (session.isCaregiverMode()) {
+            String firstName = session.getPatientName() != null
+                    ? session.getPatientName().split("\\s+")[0] : "Patient";
+            textViewTitle.setText(firstName + "'s pills");
+
+            // Hide FAB for view-only caregivers, show for editors
+            fabAdd.setVisibility(session.canEdit() ? View.VISIBLE : View.GONE);
+        } else {
+            textViewTitle.setText("Your daily pills");
+            fabAdd.setVisibility(View.VISIBLE);
+        }
 
         fabAdd.setOnClickListener(v -> showAddReminderDialog());
 
@@ -80,15 +101,13 @@ public class ReminderFragment extends Fragment
     }
 
     // ─── Firestore real-time listener ────────────────────────────────────────
-    // No orderBy — avoids the server timestamp null exclusion bug.
-    // New pills appear instantly. We sort by pillName in Java instead.
 
     private void listenForReminders() {
         progressBar.setVisibility(View.VISIBLE);
         textViewEmpty.setVisibility(View.GONE);
 
         listenerReg = db.collection("users")
-                .document(userId)
+                .document(activeUserId)
                 .collection("medications")
                 .whereEqualTo("isActive", true)
                 .addSnapshotListener((snapshots, error) -> {
@@ -103,7 +122,6 @@ public class ReminderFragment extends Fragment
                     }
 
                     reminderList.clear();
-
                     if (snapshots != null) {
                         for (var doc : snapshots.getDocuments()) {
                             PillReminder r = doc.toObject(PillReminder.class);
@@ -114,7 +132,6 @@ public class ReminderFragment extends Fragment
                         }
                     }
 
-                    // Sort by pill name alphabetically in-memory
                     reminderList.sort((a, b) ->
                             a.getPillName().compareToIgnoreCase(b.getPillName()));
 
@@ -173,16 +190,19 @@ public class ReminderFragment extends Fragment
                 .show();
     }
 
-    // ─── Save to Firestore + schedule alarm ───────────────────────────────────
+    // ─── Save reminder ────────────────────────────────────────────────────────
 
     private void saveReminder(PillReminder reminder) {
         db.collection("users")
-                .document(userId)
+                .document(activeUserId)
                 .collection("medications")
                 .add(reminder)
                 .addOnSuccessListener(ref -> {
                     reminder.setId(ref.getId());
-                    ReminderScheduler.schedule(requireContext(), reminder);
+                    // Only schedule alarm for own account
+                    if (!SessionManager.get().isCaregiverMode()) {
+                        ReminderScheduler.schedule(requireContext(), reminder);
+                    }
                     Toast.makeText(getContext(),
                             "Reminder set for " + reminder.getTime(),
                             Toast.LENGTH_SHORT).show();
@@ -198,27 +218,59 @@ public class ReminderFragment extends Fragment
     @Override
     public void onTakenToggled(PillReminder reminder, boolean taken) {
         if (reminder.getId() == null) return;
-        db.collection("users").document(userId)
-                .collection("medications").document(reminder.getId())
-                .update("taken", taken)
-                .addOnFailureListener(e ->
-                        Toast.makeText(getContext(),
-                                "Could not update: " + e.getMessage(),
-                                Toast.LENGTH_SHORT).show());
+        if (!SessionManager.get().canEdit()) return;  // view-only caregivers blocked
+
+        var medRef = db.collection("users").document(activeUserId)
+                .collection("medications").document(reminder.getId());
+
+        if (taken) {
+            db.runTransaction((Transaction.Function<Void>) transaction -> {
+                var snap          = transaction.get(medRef);
+                long remaining    = snap.getLong("pillsRemaining") != null
+                        ? snap.getLong("pillsRemaining") : 0;
+                long newRemaining = remaining > 0 ? remaining - 1 : 0;
+
+                Map<String, Object> updates = new HashMap<>();
+                updates.put("taken",         true);
+                updates.put("takenDate",      PillReminder.today());
+                updates.put("pillsRemaining", newRemaining);
+                transaction.update(medRef, updates);
+                return null;
+            }).addOnFailureListener(e ->
+                    Toast.makeText(getContext(),
+                            "Could not update: " + e.getMessage(),
+                            Toast.LENGTH_SHORT).show());
+        } else {
+            Map<String, Object> updates = new HashMap<>();
+            updates.put("taken",     false);
+            updates.put("takenDate", "");
+            medRef.update(updates)
+                    .addOnFailureListener(e ->
+                            Toast.makeText(getContext(),
+                                    "Could not update: " + e.getMessage(),
+                                    Toast.LENGTH_SHORT).show());
+        }
     }
 
-    // ─── Delete + cancel alarm ────────────────────────────────────────────────
+    // ─── Delete ───────────────────────────────────────────────────────────────
 
     @Override
     public void onDeleteClicked(PillReminder reminder) {
         if (reminder.getId() == null) return;
+        if (!SessionManager.get().canEdit()) {
+            Toast.makeText(getContext(),
+                    "You have view-only access", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
         new AlertDialog.Builder(getContext())
                 .setTitle("Remove reminder")
                 .setMessage("Remove " + reminder.getPillName() + "?")
                 .setPositiveButton("Remove", (dialog, which) -> {
-                    ReminderScheduler.cancel(requireContext(), reminder);
-                    db.collection("users").document(userId)
+                    if (!SessionManager.get().isCaregiverMode()) {
+                        ReminderScheduler.cancel(requireContext(), reminder);
+                    }
+                    db.collection("users").document(activeUserId)
                             .collection("medications").document(reminder.getId())
                             .update("isActive", false)
                             .addOnFailureListener(e ->

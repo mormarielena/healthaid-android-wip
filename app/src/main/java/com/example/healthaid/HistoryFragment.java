@@ -15,7 +15,6 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.google.android.material.textfield.TextInputEditText;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.Transaction;
@@ -29,15 +28,13 @@ import java.util.Locale;
 public class HistoryFragment extends Fragment {
 
     private FirebaseFirestore db;
-    private String            userId;
+    private String            activeUserId;
 
-    // Adherence views
-    private TextView      textAdherenceScore, textAdherenceDetail, textAdherencePeriod;
-    private ProgressBar   progressAdherence;
-
-    // Refill views
-    private LinearLayout  containerMedications;
-    private ProgressBar   progressRefill;
+    private TextView     textAdherenceScore, textAdherenceDetail,
+            textAdherencePeriod, textHistoryTitle;
+    private ProgressBar  progressAdherence;
+    private LinearLayout containerMedications;
+    private ProgressBar  progressRefill;
 
     @Nullable
     @Override
@@ -47,9 +44,10 @@ public class HistoryFragment extends Fragment {
 
         View view = inflater.inflate(R.layout.fragment_history, container, false);
 
-        db     = FirebaseFirestore.getInstance();
-        userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        db           = FirebaseFirestore.getInstance();
+        activeUserId = SessionManager.get().getActiveUserId();
 
+        textHistoryTitle    = view.findViewById(R.id.textHistoryTitle);
         textAdherenceScore  = view.findViewById(R.id.textAdherenceScore);
         textAdherenceDetail = view.findViewById(R.id.textAdherenceDetail);
         textAdherencePeriod = view.findViewById(R.id.textAdherencePeriod);
@@ -57,16 +55,25 @@ public class HistoryFragment extends Fragment {
         containerMedications = view.findViewById(R.id.containerMedications);
         progressRefill      = view.findViewById(R.id.progressRefill);
 
+        // Update title for caregiver mode
+        SessionManager session = SessionManager.get();
+        if (session.isCaregiverMode()) {
+            String firstName = session.getPatientName() != null
+                    ? session.getPatientName().split("\\s+")[0] : "Patient";
+            textHistoryTitle.setText(firstName + "'s history");
+        } else {
+            textHistoryTitle.setText("History");
+        }
+
         loadAdherence();
         loadMedicationsForRefill();
 
         return view;
     }
 
-    // ─── Adherence — count taken vs total this week ───────────────────────────
+    // ─── Adherence ────────────────────────────────────────────────────────────
 
     private void loadAdherence() {
-        // Window: last 7 days
         Calendar cal = Calendar.getInstance();
         cal.set(Calendar.HOUR_OF_DAY, 0);
         cal.set(Calendar.MINUTE, 0);
@@ -78,9 +85,7 @@ public class HistoryFragment extends Fragment {
                 .format(weekAgo) + " – today";
         textAdherencePeriod.setText(periodLabel);
 
-        // Adherence is calculated from the medications collection directly —
-        // simpler and requires no extra index.
-        db.collection("users").document(userId)
+        db.collection("users").document(activeUserId)
                 .collection("medications")
                 .whereEqualTo("isActive", true)
                 .get()
@@ -88,47 +93,47 @@ public class HistoryFragment extends Fragment {
                     List<com.google.firebase.firestore.DocumentSnapshot> docs =
                             snapshots.getDocuments();
 
-                    int total = docs.size() * 7;   // one dose/day per med × 7 days
-                    int taken = 0;
+                    int todayTotal = docs.size();
+                    int todayTaken = 0;
+                    int weekTotal  = docs.size() * 7;
+                    int weekTaken  = 0;
 
-                    // Count how many are currently marked taken
-                    // (In a production app you'd use dose_logs with timestamps;
-                    //  this is a practical approximation for the demo.)
+                    String today = PillReminder.today();
                     for (var doc : docs) {
-                        Boolean isTaken = doc.getBoolean("taken");
-                        if (Boolean.TRUE.equals(isTaken)) taken++;
+                        Boolean isTaken    = doc.getBoolean("taken");
+                        String  takenDate  = doc.getString("takenDate");
+                        if (Boolean.TRUE.equals(isTaken) && today.equals(takenDate)) {
+                            todayTaken++;
+                            weekTaken++;
+                        }
                     }
 
-                    // Show today's snapshot: X of N pills taken today
-                    int todayTotal = docs.size();
-                    int todayTaken = taken;
-
-                    updateAdherenceUI(todayTaken, todayTotal, taken, total);
+                    updateAdherenceUI(todayTaken, todayTotal, weekTaken, weekTotal);
                 })
                 .addOnFailureListener(e ->
                         Toast.makeText(getContext(),
-                                "Could not load adherence data", Toast.LENGTH_SHORT).show());
+                                "Could not load adherence data",
+                                Toast.LENGTH_SHORT).show());
     }
 
     private void updateAdherenceUI(int todayTaken, int todayTotal,
                                    int weekTaken, int weekTotal) {
         int pct = weekTotal > 0 ? (weekTaken * 100 / weekTotal) : 0;
-
         textAdherenceScore.setText(pct + "%");
         progressAdherence.setProgress(pct);
 
-        String colour = pct >= 80 ? "Good" : pct >= 50 ? "Moderate" : "Low";
+        String label = pct >= 80 ? "Good" : pct >= 50 ? "Moderate" : "Low";
         textAdherenceDetail.setText(
                 todayTaken + " of " + todayTotal + " pills taken today  ·  "
-                        + colour + " adherence this week");
+                        + label + " adherence this week");
     }
 
-    // ─── Refill tracking — load all active meds with pill counts ─────────────
+    // ─── Refill tracker ───────────────────────────────────────────────────────
 
     private void loadMedicationsForRefill() {
         progressRefill.setVisibility(View.VISIBLE);
 
-        db.collection("users").document(userId)
+        db.collection("users").document(activeUserId)
                 .collection("medications")
                 .whereEqualTo("isActive", true)
                 .orderBy("pillsRemaining", Query.Direction.ASCENDING)
@@ -139,9 +144,10 @@ public class HistoryFragment extends Fragment {
 
                     if (snapshots.isEmpty()) {
                         View empty = LayoutInflater.from(getContext())
-                                .inflate(R.layout.item_empty_state, containerMedications, false);
+                                .inflate(R.layout.item_empty_state,
+                                        containerMedications, false);
                         ((TextView) empty.findViewById(R.id.textEmpty))
-                                .setText("No medications yet.\nAdd one in the Reminders tab.");
+                                .setText("No medications yet.");
                         containerMedications.addView(empty);
                         return;
                     }
@@ -164,16 +170,15 @@ public class HistoryFragment extends Fragment {
         View card = LayoutInflater.from(getContext())
                 .inflate(R.layout.item_refill_card, containerMedications, false);
 
-        TextView textName       = card.findViewById(R.id.textRefillMedName);
-        TextView textCount      = card.findViewById(R.id.textRefillPillCount);
-        TextView textWarning    = card.findViewById(R.id.textRefillWarning);
+        TextView    textName    = card.findViewById(R.id.textRefillMedName);
+        TextView    textCount   = card.findViewById(R.id.textRefillPillCount);
+        TextView    textWarning = card.findViewById(R.id.textRefillWarning);
         ProgressBar barStock    = card.findViewById(R.id.barPillStock);
-        View btnAddRefill       = card.findViewById(R.id.btnAddRefill);
+        View        btnRefill   = card.findViewById(R.id.btnAddRefill);
 
         textName.setText(med.getPillName());
 
         int remaining = med.getPillsRemaining();
-        int threshold = med.getLowStockThreshold();
 
         if (remaining == 0) {
             textCount.setText("Not tracked");
@@ -182,7 +187,6 @@ public class HistoryFragment extends Fragment {
         } else {
             textCount.setText(remaining + " pills remaining");
             barStock.setVisibility(View.VISIBLE);
-            // Cap bar at 30 pills for visual purposes
             barStock.setMax(Math.max(30, remaining));
             barStock.setProgress(remaining);
 
@@ -194,12 +198,17 @@ public class HistoryFragment extends Fragment {
             }
         }
 
-        btnAddRefill.setOnClickListener(v -> showRefillDialog(med));
+        // Hide log refill button for view-only caregivers
+        if (!SessionManager.get().canEdit()) {
+            btnRefill.setVisibility(View.GONE);
+        } else {
+            btnRefill.setOnClickListener(v -> showRefillDialog(med));
+        }
 
         containerMedications.addView(card);
     }
 
-    // ─── Add refill dialog ────────────────────────────────────────────────────
+    // ─── Refill dialog ────────────────────────────────────────────────────────
 
     private void showRefillDialog(PillReminder med) {
         View dialogView = LayoutInflater.from(getContext())
@@ -217,52 +226,44 @@ public class HistoryFragment extends Fragment {
                     String countStr = editCount.getText().toString().trim();
                     if (countStr.isEmpty()) {
                         Toast.makeText(getContext(),
-                                "Enter number of pills added", Toast.LENGTH_SHORT).show();
+                                "Enter number of pills added",
+                                Toast.LENGTH_SHORT).show();
                         return;
                     }
-                    int pillsAdded  = Integer.parseInt(countStr);
-                    String pharmacy = editPharmacy.getText().toString().trim();
-                    String rxRef    = editRxRef.getText().toString().trim();
-                    String notes    = editNotes.getText().toString().trim();
-
-                    saveRefill(med, pillsAdded, pharmacy, rxRef, notes);
+                    saveRefill(med,
+                            Integer.parseInt(countStr),
+                            editPharmacy.getText().toString().trim(),
+                            editRxRef.getText().toString().trim(),
+                            editNotes.getText().toString().trim());
                 })
                 .setNegativeButton("Cancel", null)
                 .show();
     }
 
-    // ─── Save refill — transaction updates pill count + writes record ─────────
-
     private void saveRefill(PillReminder med, int pillsAdded,
                             String pharmacy, String rxRef, String notes) {
-
-        var medRef = db.collection("users").document(userId)
+        var medRef = db.collection("users").document(activeUserId)
                 .collection("medications").document(med.getId());
 
         db.runTransaction((Transaction.Function<Void>) transaction -> {
-            var snapshot     = transaction.get(medRef);
-            long currentCount = snapshot.getLong("pillsRemaining") != null
-                    ? snapshot.getLong("pillsRemaining") : 0;
-            long newTotal    = currentCount + pillsAdded;
+            var  snap        = transaction.get(medRef);
+            long current     = snap.getLong("pillsRemaining") != null
+                    ? snap.getLong("pillsRemaining") : 0;
+            long newTotal    = current + pillsAdded;
 
-            // Update pill count on the medication
             transaction.update(medRef, "pillsRemaining", newTotal);
 
-            // Write refill record to subcollection
             RefillRecord record = new RefillRecord(
                     med.getId(), med.getPillName(),
                     pillsAdded, (int) newTotal,
                     pharmacy, rxRef, notes);
-
-            var refillRef = medRef.collection("refill_records").document();
-            transaction.set(refillRef, record);
-
+            transaction.set(medRef.collection("refill_records").document(), record);
             return null;
         }).addOnSuccessListener(unused -> {
             Toast.makeText(getContext(),
                     pillsAdded + " pills added to " + med.getPillName(),
                     Toast.LENGTH_SHORT).show();
-            loadMedicationsForRefill();   // refresh the list
+            loadMedicationsForRefill();
         }).addOnFailureListener(e ->
                 Toast.makeText(getContext(),
                         "Refill save failed: " + e.getMessage(),
