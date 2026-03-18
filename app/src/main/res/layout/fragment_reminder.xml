@@ -1,16 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/bg_light"> <TextView
-    android:id="@+id/textViewTitle"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:text="Your Daily Pills"
-    android:textSize="26sp"
-    android:textStyle="bold"
-    android:textColor="@color/text_dark" android:layout_margin="16dp"/>
+    android:background="@color/bg_light">
+
+    <TextView
+        android:id="@+id/textViewTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Your Daily Pills"
+        android:textSize="26sp"
+        android:textStyle="bold"
+        android:textColor="@color/text_dark"
+        android:layout_margin="16dp" />
+
+    <!-- Loading spinner -->
+    <ProgressBar
+        android:id="@+id/progressBarReminders"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:visibility="gone" />
+
+    <!-- Empty state message -->
+    <TextView
+        android:id="@+id/textViewEmpty"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:text="No reminders yet.\nTap + to add your first pill."
+        android:textAlignment="center"
+        android:textSize="15sp"
+        android:lineSpacingExtra="4dp"
+        android:textColor="@color/text_gray"
+        android:visibility="gone" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewReminders"
@@ -18,7 +43,7 @@
         android:layout_height="match_parent"
         android:layout_below="@id/textViewTitle"
         android:clipToPadding="false"
-        android:paddingBottom="88dp"/>
+        android:paddingBottom="88dp" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fabAddReminder"

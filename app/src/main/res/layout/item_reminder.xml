@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -13,6 +14,7 @@
         android:layout_height="wrap_content"
         android:padding="16dp">
 
+        <!-- Pill icon -->
         <ImageView
             android:id="@+id/imageViewPill"
             android:layout_width="40dp"
@@ -20,17 +22,46 @@
             android:layout_centerVertical="true"
             android:src="@drawable/reminder" />
 
+        <!-- Delete button (top-right) -->
+        <ImageButton
+            android:id="@+id/buttonDelete"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@android:drawable/ic_menu_delete"
+            android:contentDescription="Delete reminder"
+            app:tint="@color/text_gray"
+            />
+
+        <!-- Taken checkbox (left of delete) -->
+        <CheckBox
+            android:id="@+id/checkBoxTaken"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toStartOf="@id/buttonDelete"
+            android:layout_centerVertical="true"
+            android:layout_marginEnd="4dp"
+            android:buttonTint="@color/mint_green_dark"
+            android:text="Taken"
+            android:textSize="12sp"
+            android:textColor="@color/text_gray" />
+
+        <!-- Pill name -->
         <TextView
             android:id="@+id/textViewPillName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_toEndOf="@id/imageViewPill"
+            android:layout_toStartOf="@id/checkBoxTaken"
             android:layout_marginStart="16dp"
             android:text="Pill Name"
-            android:textSize="18sp"
+            android:textSize="17sp"
             android:textStyle="bold"
-            android:textColor="#333333"/>
+            android:textColor="@color/text_dark" />
 
+        <!-- Dosage + time -->
         <TextView
             android:id="@+id/textViewTime"
             android:layout_width="wrap_content"
@@ -39,8 +70,9 @@
             android:layout_toEndOf="@id/imageViewPill"
             android:layout_marginStart="16dp"
             android:layout_marginTop="4dp"
-            android:text="08:00 AM"
-            android:textSize="14sp"
-            android:textColor="#666666"/>
+            android:text="500mg tablet — 08:00 AM"
+            android:textSize="13sp"
+            android:textColor="@color/text_gray" />
+
     </RelativeLayout>
 </androidx.cardview.widget.CardView>

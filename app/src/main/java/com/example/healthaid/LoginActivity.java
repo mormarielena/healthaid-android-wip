@@ -4,19 +4,22 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.google.android.material.button.MaterialButton;
+import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.FirebaseAuth;
 
 public class LoginActivity extends AppCompatActivity {
 
-    private EditText editTextEmail, editTextPassword;
-    private Button buttonLogin;
-    private TextView textViewGoToRegister;
-    private FirebaseAuth mAuth;
+    private TextInputEditText editTextEmail, editTextPassword;
+    private MaterialButton    buttonLogin;
+    private ProgressBar       progressBar;
+    private FirebaseAuth      mAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,41 +28,63 @@ public class LoginActivity extends AppCompatActivity {
 
         mAuth = FirebaseAuth.getInstance();
 
+        // Skip login if already signed in
         if (mAuth.getCurrentUser() != null) {
-            startActivity(new Intent(LoginActivity.this, SplashActivity.class));
-            finish();
+            goToMain();
+            return;
         }
 
-        editTextEmail = findViewById(R.id.editTextLoginEmail);
+        editTextEmail    = findViewById(R.id.editTextLoginEmail);
         editTextPassword = findViewById(R.id.editTextLoginPassword);
-        buttonLogin = findViewById(R.id.buttonLogin);
-        textViewGoToRegister = findViewById(R.id.textViewGoToRegister);
+        buttonLogin      = findViewById(R.id.buttonLogin);
+        progressBar      = findViewById(R.id.progressBarLogin);
+        TextView goToRegister = findViewById(R.id.textViewGoToRegister);
 
-        textViewGoToRegister.setOnClickListener(v -> {
-            startActivity(new Intent(LoginActivity.this, RegisterActivity.class));
-        });
+        goToRegister.setOnClickListener(v ->
+                startActivity(new Intent(this, RegisterActivity.class)));
 
         buttonLogin.setOnClickListener(v -> loginUser());
     }
 
     private void loginUser() {
-        String email = editTextEmail.getText().toString().trim();
+        String email    = editTextEmail.getText().toString().trim();
         String password = editTextPassword.getText().toString().trim();
 
-        if (TextUtils.isEmpty(email) || TextUtils.isEmpty(password)) {
-            Toast.makeText(this, "Please enter email and password", Toast.LENGTH_SHORT).show();
+        if (TextUtils.isEmpty(email)) {
+            editTextEmail.setError("Email is required");
+            editTextEmail.requestFocus();
+            return;
+        }
+        if (TextUtils.isEmpty(password)) {
+            editTextPassword.setError("Password is required");
+            editTextPassword.requestFocus();
             return;
         }
 
+        setLoading(true);
+
         mAuth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(task -> {
+                    setLoading(false);
                     if (task.isSuccessful()) {
-                        Toast.makeText(LoginActivity.this, "Login successful!", Toast.LENGTH_SHORT).show();
-                        startActivity(new Intent(LoginActivity.this, MainActivity.class));
-                        finish();
+                        goToMain();
                     } else {
-                        Toast.makeText(LoginActivity.this, "Login failed: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
+                        String msg = task.getException() != null
+                                ? task.getException().getMessage()
+                                : "Login failed";
+                        Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
                     }
                 });
+    }
+
+    private void setLoading(boolean loading) {
+        progressBar.setVisibility(loading ? View.VISIBLE : View.GONE);
+        buttonLogin.setEnabled(!loading);
+        buttonLogin.setText(loading ? "Signing in…" : "Sign in");
+    }
+
+    private void goToMain() {
+        startActivity(new Intent(this, MainActivity.class));
+        finish();
     }
 }
