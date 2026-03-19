@@ -1,4 +1,4 @@
-package com.example.healthaid;
+package com.example.healthaid.fragments;
 
 import android.app.AlertDialog;
 import android.app.TimePickerDialog;
@@ -17,6 +17,11 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.healthaid.R;
+import com.example.healthaid.adapters.ReminderAdapter;
+import com.example.healthaid.utils.ReminderScheduler;
+import com.example.healthaid.utils.SessionManager;
+import com.example.healthaid.models.PillReminder;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.firestore.FirebaseFirestore;

@@ -1,9 +1,9 @@
-package com.example.healthaid;
+package com.example.healthaid.models;
 
 public class Symptom {
-    private String name;
-    private String subtitle;
-    private int    iconResId;
+    private final String name;
+    private final String subtitle;
+    private final int    iconResId;
 
     public Symptom(String name, String subtitle, int iconResId) {
         this.name     = name;

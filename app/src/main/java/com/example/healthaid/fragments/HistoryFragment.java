@@ -1,4 +1,4 @@
-package com.example.healthaid;
+package com.example.healthaid.fragments;
 
 import android.app.AlertDialog;
 import android.os.Bundle;
@@ -14,6 +14,10 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.example.healthaid.R;
+import com.example.healthaid.models.RefillRecord;
+import com.example.healthaid.utils.SessionManager;
+import com.example.healthaid.models.PillReminder;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;

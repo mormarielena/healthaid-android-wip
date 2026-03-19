@@ -1,4 +1,6 @@
-package com.example.healthaid;
+package com.example.healthaid.utils;
+
+import com.example.healthaid.models.CaregiverLink;
 
 /**
  * Singleton that tracks whether the current user is viewing their own data

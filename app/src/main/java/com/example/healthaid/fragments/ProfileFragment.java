@@ -1,4 +1,4 @@
-package com.example.healthaid;
+package com.example.healthaid.fragments;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -13,6 +13,10 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.example.healthaid.utils.MissedDoseWatcher;
+import com.example.healthaid.R;
+import com.example.healthaid.utils.SessionManager;
+import com.example.healthaid.activities.LoginActivity;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.FirebaseAuth;

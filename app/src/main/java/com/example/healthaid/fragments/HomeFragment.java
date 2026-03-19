@@ -1,4 +1,4 @@
-package com.example.healthaid;
+package com.example.healthaid.fragments;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -13,6 +13,10 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.healthaid.R;
+import com.example.healthaid.adapters.SymptomAdapter;
+import com.example.healthaid.activities.SymptomDetailActivity;
+import com.example.healthaid.models.Symptom;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;

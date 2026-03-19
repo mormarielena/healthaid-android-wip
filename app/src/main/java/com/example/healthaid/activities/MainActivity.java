@@ -1,4 +1,4 @@
-package com.example.healthaid;
+package com.example.healthaid.activities;
 
 import android.os.Bundle;
 import android.view.View;
@@ -7,6 +7,15 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
+import com.example.healthaid.fragments.CaregiverFragment;
+import com.example.healthaid.models.CaregiverLink;
+import com.example.healthaid.fragments.HistoryFragment;
+import com.example.healthaid.fragments.HomeFragment;
+import com.example.healthaid.utils.MissedDoseWatcher;
+import com.example.healthaid.fragments.ProfileFragment;
+import com.example.healthaid.R;
+import com.example.healthaid.fragments.ReminderFragment;
+import com.example.healthaid.utils.SessionManager;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;

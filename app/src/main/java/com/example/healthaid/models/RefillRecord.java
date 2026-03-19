@@ -1,4 +1,4 @@
-package com.example.healthaid;
+package com.example.healthaid.models;
 
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentId;

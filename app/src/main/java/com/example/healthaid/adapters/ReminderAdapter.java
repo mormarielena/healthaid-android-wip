@@ -1,4 +1,4 @@
-package com.example.healthaid;
+package com.example.healthaid.adapters;
 
 import android.graphics.Paint;
 import android.view.LayoutInflater;
@@ -10,6 +10,9 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.healthaid.R;
+import com.example.healthaid.models.PillReminder;
 
 import java.util.List;
 

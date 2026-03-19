@@ -1,9 +1,11 @@
-package com.example.healthaid;
+package com.example.healthaid.receivers;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
+import com.example.healthaid.utils.ReminderScheduler;
+import com.example.healthaid.models.PillReminder;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;

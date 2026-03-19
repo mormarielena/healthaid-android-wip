@@ -27,7 +27,7 @@
         tools:targetApi="31">
 
         <activity
-            android:name=".LoginActivity"
+            android:name=".activities.LoginActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -35,19 +35,19 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".SplashActivity"        android:exported="false" />
-        <activity android:name=".MainActivity"          android:exported="false" />
-        <activity android:name=".RegisterActivity"      android:exported="false" />
-        <activity android:name=".SymptomDetailActivity" android:exported="false" />
+        <activity android:name=".activities.SplashActivity"        android:exported="false" />
+        <activity android:name=".activities.MainActivity"          android:exported="false" />
+        <activity android:name=".activities.RegisterActivity"      android:exported="false" />
+        <activity android:name=".activities.SymptomDetailActivity" android:exported="false" />
 
         <!-- Fires the notification at alarm time -->
         <receiver
-            android:name=".ReminderReceiver"
+            android:name=".receivers.ReminderReceiver"
             android:exported="false" />
 
         <!-- Reschedules all alarms after the device reboots -->
         <receiver
-            android:name=".BootReceiver"
+            android:name=".receivers.BootReceiver"
             android:exported="true"
             android:permission="android.permission.RECEIVE_BOOT_COMPLETED">
             <intent-filter>

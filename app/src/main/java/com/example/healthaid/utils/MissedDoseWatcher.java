@@ -1,4 +1,4 @@
-package com.example.healthaid;
+package com.example.healthaid.utils;
 
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -9,6 +9,7 @@ import android.os.Build;
 
 import androidx.core.app.NotificationCompat;
 
+import com.example.healthaid.activities.MainActivity;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.ListenerRegistration;

@@ -1,4 +1,4 @@
-package com.example.healthaid;
+package com.example.healthaid.adapters;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -8,6 +8,9 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.healthaid.R;
+import com.example.healthaid.models.Symptom;
 
 import java.util.List;
 
