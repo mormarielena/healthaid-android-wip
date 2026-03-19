@@ -10,7 +10,7 @@ public class RefillRecord {
     private String id;
 
     private String    medicationId;
-    private String    pillName;          // denormalised for display
+    private String    pillName;
     private int       pillsAdded;
     private int       pillsTotalAfter;   // running total after this refill
     private String    pharmacyName;

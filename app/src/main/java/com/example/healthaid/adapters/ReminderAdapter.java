@@ -52,7 +52,6 @@ public class ReminderAdapter extends RecyclerView.Adapter<ReminderAdapter.Remind
         holder.textViewTime.setText(dosagePart + reminder.getTime());
 
         // Use isTakenToday() — automatically false if takenDate != today,
-        // giving us a free daily reset without any server-side job.
         boolean takenToday = reminder.isTakenToday();
 
         if (takenToday) {

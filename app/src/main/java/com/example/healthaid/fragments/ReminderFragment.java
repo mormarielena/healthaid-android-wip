@@ -81,7 +81,6 @@ public class ReminderFragment extends Fragment
                     ? session.getPatientName().split("\\s+")[0] : "Patient";
             textViewTitle.setText(firstName + "'s pills");
 
-            // Hide FAB for view-only caregivers, show for editors
             fabAdd.setVisibility(session.canEdit() ? View.VISIBLE : View.GONE);
         } else {
             textViewTitle.setText("Your daily pills");

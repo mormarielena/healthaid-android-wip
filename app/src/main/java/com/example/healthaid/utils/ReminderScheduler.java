@@ -31,7 +31,7 @@ public class ReminderScheduler {
         cal.set(Calendar.SECOND,      0);
         cal.set(Calendar.MILLISECOND, 0);
 
-        // Already passed today → push to tomorrow
+        // Already passed today -> push to tomorrow
         if (cal.getTimeInMillis() <= System.currentTimeMillis()) {
             cal.add(Calendar.DAY_OF_YEAR, 1);
         }
@@ -39,7 +39,6 @@ public class ReminderScheduler {
         AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         PendingIntent pi = buildPendingIntent(context, reminder);
 
-        // USE_EXACT_ALARM is pre-granted — no runtime check needed
         am.setAlarmClock(
                 new AlarmManager.AlarmClockInfo(cal.getTimeInMillis(), pi), pi);
     }
@@ -61,7 +60,6 @@ public class ReminderScheduler {
                 reminder.getDosage() + " " + reminder.getUnit());
         intent.putExtra(ReminderReceiver.EXTRA_REMINDER_ID,  reminder.getId());
 
-        // Firestore doc ID hashCode gives a stable unique int per reminder
         int requestCode = reminder.getId().hashCode();
 
         return PendingIntent.getBroadcast(
@@ -72,7 +70,7 @@ public class ReminderScheduler {
         );
     }
 
-    // ─── Parse "08:00 AM" or "14:30" → [hour24, minute] ─────────────────────
+    // ─── Parse "08:00 AM" or "14:30" -> [hour24, minute] ─────────────────────
 
     public static int[] parseTime(String timeStr) {
         if (timeStr == null || timeStr.isEmpty()) return null;

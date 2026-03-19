@@ -29,7 +29,6 @@ public class PillReminder {
     @ServerTimestamp
     private Timestamp createdAt;
 
-    // Required no-arg constructor for Firestore
     public PillReminder() {}
 
     public PillReminder(String pillName, String dosage, String unit, String time) {
@@ -51,8 +50,6 @@ public class PillReminder {
     }
 
     // ─── Has this pill been taken TODAY? ─────────────────────────────────────
-    // If takenDate doesn't match today's date the pill is treated as not taken,
-    // even if taken=true — this gives us a free daily reset with no Cloud Function.
 
     public boolean isTakenToday() {
         return taken && today().equals(takenDate);

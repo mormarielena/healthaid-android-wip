@@ -32,7 +32,6 @@ public class SplashActivity extends AppCompatActivity {
 
         TextView textViewName = findViewById(R.id.textViewSplashName);
 
-        // Fetch name from Firestore, fall back to "there" if not set yet
         FirebaseFirestore.getInstance()
                 .collection("users")
                 .document(user.getUid())
@@ -43,7 +42,7 @@ public class SplashActivity extends AppCompatActivity {
                         name = snapshot.getString("name");
                     }
 
-                    // Use first name only so it fits on screen nicely
+                    // Use first name only so it fits on screen
                     if (name != null && !name.trim().isEmpty()) {
                         String firstName = name.trim().split("\\s+")[0];
                         textViewName.setText(firstName + "!");
@@ -54,7 +53,6 @@ public class SplashActivity extends AppCompatActivity {
                     proceedToMain();
                 })
                 .addOnFailureListener(e -> {
-                    // Firestore failed — still show the splash and move on
                     textViewName.setText("there!");
                     proceedToMain();
                 });

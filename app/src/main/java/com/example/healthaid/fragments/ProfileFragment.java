@@ -140,7 +140,6 @@ public class ProfileFragment extends Fragment {
         if (name != null && !name.isEmpty()) {
             textViewProfileName.setText(name);
 
-            // Build initials: up to 2 words → "John Doe" → "JD"
             String[] parts = name.trim().split("\\s+");
             String initials = String.valueOf(parts[0].charAt(0)).toUpperCase();
             if (parts.length > 1) {

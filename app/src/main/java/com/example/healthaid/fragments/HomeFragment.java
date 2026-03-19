@@ -68,11 +68,9 @@ public class HomeFragment extends Fragment {
         else if (hour < 18) timeGreeting = "Good afternoon";
         else                timeGreeting = "Good evening";
 
-        // Default greeting without name
         textViewGreeting.setText(timeGreeting + "!");
         textViewSubGreeting.setText("How are you feeling today?");
 
-        // Try to personalise with name from Firestore
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user == null) return;
 

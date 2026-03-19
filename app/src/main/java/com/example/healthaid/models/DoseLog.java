@@ -14,7 +14,7 @@ public class DoseLog {
     private String id;
 
     private String    medicationId;   // Firestore doc ID of the parent medication
-    private String    pillName;       // denormalised for easy display
+    private String    pillName;
     private String    action;         // "taken" | "missed" | "snoozed"
     private String    scheduledTime;  // e.g. "08:00 AM"
 

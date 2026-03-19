@@ -5,11 +5,6 @@ import com.example.healthaid.models.CaregiverLink;
 /**
  * Singleton that tracks whether the current user is viewing their own data
  * or monitoring a patient as a caregiver.
- *
- * Call SessionManager.get() from any fragment to know:
- *  - whose medications to load (getActiveUserId())
- *  - whether to show the add/edit FAB (isOwnAccount() or isEditor())
- *  - what name to show in the toggle banner
  */
 public class SessionManager {
 

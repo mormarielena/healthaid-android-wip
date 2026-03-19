@@ -14,9 +14,9 @@ public class CaregiverLink {
 
     private String    patientUserId;
     private String    caregiverUserId;
-    private String    caregiverEmail;    // denormalised for display
-    private String    caregiverName;     // denormalised for display
-    private String    patientName;       // denormalised so caregiver sees who they monitor
+    private String    caregiverEmail;
+    private String    caregiverName;
+    private String    patientName;
     private String    permissionLevel;
     private boolean   isActive;
     private Timestamp linkedAt;
